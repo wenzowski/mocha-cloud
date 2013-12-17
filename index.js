@@ -152,21 +152,24 @@ Cloud.prototype.start = function(fn){
           if (err) return done(err);
 
           function wait() {
-            browser.eval('window.mochaResults', function(err, res){
-              if (err) return done(err);
+            browser.eval('window.mochaResults', onchange);
+            browser.eval('window.pageError', onchange);
+          }
 
-              if (!res) {
-                debug('waiting for results');
-                setTimeout(wait, 1000);
-                return;
-              }
+          function onchange(err, res){
+            if (err) return done(err);
 
-              debug('results %j', res);
-              self.emit('end', conf, res);
-              browser.sauceJobStatus(res.failures === 0, function(err) {
-                browser.quit();
-                done(err, res);
-              });
+            if (!res) {
+              debug('waiting for results');
+              setTimeout(wait, 1000);
+              return;
+            }
+
+            debug('results %j', res);
+            self.emit('end', conf, res);
+            browser.sauceJobStatus(res.failures && res.failures === 0, function(err) {
+              browser.quit();
+              done(err, res);
             });
           }
 
