@@ -130,6 +130,9 @@ Cloud.prototype.start = function(fn){
   var batch = new Batch;
   fn = fn || function(){};
 
+  // don't kill everything when there's an error
+  batch.throws(false);
+
   if (self._concurrency) {
     batch.concurrency(self._concurrency);
   }
@@ -149,15 +152,20 @@ Cloud.prototype.start = function(fn){
         self.emit('start', conf);
 
         browser.get(self._url, function(err){
-          if (err) return done(err);
+          if (err) {
+            debug('browser.get(%s) error: %s', self.url, err);
+            return done(err);
+          }
 
           function wait() {
             browser.eval('window.mochaResults', onchange);
-            browser.eval('window.pageError', onchange);
           }
 
           function onchange(err, res){
-            if (err) return done(err);
+            if (err) {
+              debug('browser.eval() error: %s', err);
+              return done(err);
+            }
 
             if (!res) {
               debug('waiting for results');
@@ -167,7 +175,9 @@ Cloud.prototype.start = function(fn){
 
             debug('results %j', res);
             self.emit('end', conf, res);
-            browser.sauceJobStatus(res.failures && res.failures === 0, function(err) {
+            var passed = !res.error && 0 == res.failures;
+            browser.sauceJobStatus(passed, function(err) {
+              debug('setting sauce job status: %s', passed ? 'pass' : 'fail');
               browser.quit();
               done(err, res);
             });
