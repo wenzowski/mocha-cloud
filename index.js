@@ -178,8 +178,9 @@ Cloud.prototype.start = function(fn){
             var passed = !res.error && 0 == res.failures;
             browser.sauceJobStatus(passed, function(err) {
               debug('setting sauce job status: %s', passed ? 'pass' : 'fail');
-              browser.quit();
-              done(err, res);
+              browser.quit(function(error) {
+                done(err || error, res);
+              });
             });
           }
 
