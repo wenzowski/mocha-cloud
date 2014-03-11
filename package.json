@@ -1,6 +1,10 @@
 {
   "name": "mocha-cloud",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wenzowski/mocha-cloud.git"
+  },
   "description": "Mocha tests in the cloud with Saucelabs",
   "keywords": ["mocha", "test", "tdd", "bdd", "saucelabs", "selenium", "cloud", "testing"],
   "author": "TJ Holowaychuk <tj@vision-media.ca>",
